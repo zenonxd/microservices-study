@@ -60,7 +60,7 @@ sistema, exatamente como podemos ver na imagem acima! Alguns feitos com Java, Ou
 ## Escalável
 
 Microsserviços podem ser escalados de forma independente, ou seja, caso um serviço precise de mais recursos devido a 
-aumento de carga, ele pode ser escalado sem afetar outros serviços (ver de novo isso).
+aumento de carga, ele pode ser escalado sem afetar outros serviços.
 
 Ou seja, um sistema escalável pode crescer ou ser ajustado conforme a necessidade, seja aumentando recurso ou distribuindo
 carga de maneira inteligente.
@@ -98,7 +98,7 @@ Antes de falarmos sobre os patterns, vamos abordar brevemente o protocolo HTTP!
 
 Várias aplicações, cada um com seu banco de dados.
 
-Antes ficava tudo no mesmo pacote (quando se é monolítico), correto? O Order chamava o Shipping e por aí vai...
+Antes ficava tudo no mesmo pacote (quando se é monolítico), correto? O OrderService chamava o OrderShipping e por aí vai...
 
 Como agora temos vários serviços e estão separados, precisamos nos comunicar **PELA REDE**, pois são sistemas distribuídos.
 
@@ -119,7 +119,7 @@ com essas chamadas.
 Então a ideia agora é a seguinte: antes, o nosso SPA (o frontend) chamava os serviços diretamente. Agora, ele passa a
 chamar um recurso do gateway (não mais os serviços diretamente).
 
-Então se ele recebe um recurso para "/orders", encaminharemos a requisição para o serviço de pedidos.
+Então se ele recebe um recurso para "/orders", encaminharemos a requisição para o serviço de pedidos (OrderService).
 
 Exatamente como citamos acima, o gateway é um ponto central para acessarmos os microsserviços, minimizando aquela bagunça
 do frontend fazendo chamada para todo mundo.
@@ -165,14 +165,12 @@ microsserviço. **Ele vai direcionar as requisições que irão chegar para dife
 **Observe na imagem que agora temos várias instancias rodando ao mesmo tempo! Uma com 3, outra com duas...**
 
 E agora também não temos mais a ideia de acessar o endereço e uma porta específica. Se você reparar nas imagens acima
-acessamos por exemplo ``order:8080``. 
+anteriormente estávamos acessando, por exemplo ``order:8080``. 
 
 Agora, o Gateway chama o Load Balancer e ele por sua vez, direciona para a porta correta: ``order:port``.
 
 Frisando que o Load Balancer faz um trabalho de "Round Robin". Ou seja, a primeira requisição vai para a primeira 
 instância e assim sucessivamente.
-
-
 
 ## 4º Pattern, Centralized Configuration
 
@@ -186,7 +184,7 @@ irá centralizar todos os arquivos de configuração, e ainda será possível at
 
 ![img_5.png](img_5.png)
 
-Esse componente ``Config Server``, levará também até mesmo o arquivo de configuração do Gateway.
+Esse componente ``Config Server``, levará até mesmo o arquivo de configuração do Gateway.
 
 E é conforme citamos acima, com esses arquivos centralizados em um só local, é mais fácil de ajustar o que for necessário,
 sem afetar o programa.
@@ -194,12 +192,12 @@ sem afetar o programa.
 ## Alternativa para uso de HTTP? 
 
 Sabemos que o HTTP é uma relação síncrona, ou seja, nosso SPA (frontend) vai esperar as chamadas serem respondidas
-e teremos algumas esperas se tivermos chamadas entre serviços (essas chamadas também são sincronas).
+e teremos algumas esperas se tivermos chamadas entre serviços (essas chamadas também são síncronas).
 
 Isso compromete a disponibilidade do nosso sistema. Se um serviço cai, será que precisamos tornar todo o e-commerce
 indisponível?
 
-Então temos outras formas de comunicação entre serviços além da inter service (serviço para serviço de forma sincrona).
+Então temos outras formas de comunicação entre serviços além da inter service (serviço para serviço de forma síncrona).
 
 Aí que vem o Event Driven. ⬇️
 
@@ -208,7 +206,7 @@ Aí que vem o Event Driven. ⬇️
 A ideia é que a gente utilize uma conexão baseada em **eventos**.
 
 Antes, tínhamos requisições sendo feitas diretamente, chegando no SPA, indo para o Gateway, depois orquestrando uma
-requisição por vez.
+requisição por vez...
 
 Agora faremos o mínimo de chamadas possível via Gateway, e as outras etapas de comunicação podemos fazer via Message
 Broker, conforme podemos ver pela imagem abaixo.
@@ -216,8 +214,10 @@ Broker, conforme podemos ver pela imagem abaixo.
 ![img_6.png](img_6.png)
 
 Message Broker é um enviador e recebedor de mensagens. Por exemplo, quando um pedido é feito, a gente pode notificar
-o sistema de pagamento. Mas não precisa chamar o sistema de pagamento direto, a gente pode mandar uma mensagem e quando
-o sistema de pagamento receber uma mensagem desse tipo ele já vai ficar "ouvindo", para que ele possa trabalhar/processar.
+o sistema de pagamento.
+
+Mas não precisa chamar o sistema de pagamento direto, a gente pode mandar uma mensagem e quando o sistema de pagamento
+receber uma mensagem desse tipo ele já vai ficar "ouvindo", para que ele possa trabalhar/processar.
 
 E por sua vez, esse sistema de pagamento, ao começar a processar, poderá enviar OUTRA message para outro service.
 
@@ -227,8 +227,8 @@ tudo isso de forma assíncrona!
 Ou seja, se um serviço fica momentaneamente de fora, quando ele voltar ao ar, poderá buscar a mensagem recebida e 
 processá-la de acordo.
 
-Esse modelo também é chamado de PUB/SUB. Visto que, alguém publica uma mensagem no broker e sub, pois alguém se inscreve
-para recebê-las.
+Esse modelo também é chamado de PUB/SUB. Visto que, alguém publica uma mensagem no broker (PUB) e alguém se inscreve
+para recebê-las (SUB).
 
 ### Tipos de mensagens
 
@@ -268,7 +268,7 @@ que atende essa necessidade é o **Event Sourcing, advindo do Event Driven**. �
 ## Event Sourcing
 
 Imagine que temos um Record, um User. Em um sistema tradicional, alguém manda uma requisição POST para criar um Usuário,
-ele vai para o banco de dados com todas as informações, nós vamos ele completo no banco de dados.
+ele vai para o banco de dados com todas as informações, e nós salvamos ele completo no banco de dados.
 
 Já no Event Sourcing, ao invés de criar um registro e salvá-lo por completo, nós salvamos os eventos com as mudanças
 necessárias para construir esse estado.
@@ -302,6 +302,94 @@ Por isso algumas aplicações é interessante usar o Event Sourcing (advindo do 
 
 **Caso trocássemos de banco, é a mesma coisa... é só dar um replay nos eventos e construir o item final.**
 
-## CQRS
+## Command Query Responsibility Segregation - CQRS
 
-Estratégia constantemente utilizada com o Event Sourcing. 20:37
+Estratégia constantemente utilizada com o Event Sourcing. 
+
+Por exemplo, se temos uma base de dados que está otimizada para leitura, geralmente aplicamos índices para otimizar esse
+processo de leitura, correto? Mas se quiséssemos depois otimizar para escrita, teríamos que remover esses indices para que
+a escrita seja mais rápida, onde, por sua vez, iríamos prejudicar a leitura.
+
+A idéia é separar os comandos de processamento dos comandos de consulta, separando as responsabilidades e, consequentemente,
+otimizando o serviço.
+
+Possui operações básicas, tais como:
+
+- Commandos (escritas), são trigger actions, que acabam mudando o estado da aplicação
+
+
+- Queries (leituras), basicamente retorno de informação - find, get...
+
+
+- Event (notificação de algo que aconteceu)
+
+Possui também um microsserviço cuidando de ambas operações (ou dois), um para cada operação e com seu próprio banco
+de dados.
+
+O banco pode ser otimizado para escrita ou leitura, dependendo do microsserviço (se ele é command ou query).
+
+Para sincronizar os bancos, esses eventos de escrita são enviados para uma fila de mensagem (pelo commands handler), que
+por sua vez, será consumido pelo Event Handler do Query Microservice.
+
+E como citamos, geralmente esse pattern é usado com Event Sourcing.
+
+![img_8.png](img_8.png)
+
+Do lado esquerdo, temos o command (escrita), logo, os estados/eventos.
+
+Do lado direito, temos a query, o registro final que pode ser consultado.
+
+Esse broker no meio, nos auxilia a sincronizar os dados, gerados pelos eventos (lado esquerdo), publicados no broker que
+por sua vez, são consumidos pelo banco de leitura.
+
+## SAGA Pattern - Visão de transação  
+
+Vamos relembrar uma coisa. Antes de separarmos os serviços, eles estavam no contexto de uma transação somente.
+
+Assim que os separamos, nós precisamos trazer uma visão de transação diferente, visto que agora os serviços estão
+separados na rede.
+
+Então ao invés de termos somente UMA transação global, tipo: fazer pedido > pagamento > shipping > e-mail.
+
+Teremos várias sub transações que irão pertencer a nossa **saga** e caso alguma delas falhe, simplesmente fazemos um
+rollback de tudo. **Esse rollback é feito com transações compensatórias**.
+
+![img_9.png](img_9.png)
+
+Veja na imagem acima. Na parte da direita, o quinto evento não foi concluído. Portanto, nós consumimos esse evento que
+deu problema e cada um dos serviços anteriores que estão lidando com seu respectivo evento, terão que dar rollback (sua 
+transação compensatória).
+
+Mas podemos ter diferentes tipos de saga, a **coreografada** e **orquestrada**, veja:
+
+### Orquestrada
+
+Veja a imagem no lado esquerdo, o próprio serviço (orquestrador da saga) gera os eventos, mesmo sendo serviços diferentes
+A e B.
+
+### Coreografada
+
+Nós não teríamos um serviço orquestrador. Ao invés disto, cada serviço será responsável por gerar seus eventos dentro da
+saga.
+
+### Qual escolher?
+
+A orquestrada geralmente é mais interessante, pois nos dá uma visão mais global da saga e fica mais fácil de manter, pois
+tudo fica lá.
+
+Se a gente realiza muito desacoplamento, espalha a geração de eventos e fica difícil ter uma visão mais global.
+
+Com a orquestrada se ocorre algum problema, fica mais fácil saber onde ele ocorreu e corrigir.
+
+❗Entretanto, importante: para escolher o melhor tipo de saga, estude seu sistema, entenda a arquitetura do mesmo, quantos
+eventos ou serviços ele irá possuir, etc.
+
+# Resumo
+
+No tocante a aplicação, a idéia é separar nossos serviços usando a arquitetura Event Driven (utilizada para 
+desacoplá-los ainda mais).
+
+Já na parte de dados, utilizando CQRS com Event Sourcing para otimizar a leitura e escrita.
+
+E por fim a transação. Antes de separarmos os serviços, eles estavam no contexto de uma só transação. Com eles separados,
+precisamos trazer uma visão de transação para serviços que estão separados na rede (utilizando SAGA Pattern).

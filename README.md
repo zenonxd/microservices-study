@@ -149,6 +149,8 @@ Ele sabe porque todos os microsserviços quando se iniciam, são registrados nel
 
 Então até o momento, centralizamos também o gerenciamento de endereços em um componente que só tem essa responsabilidade!
 
+[Aprenda a implementar o Service Discovery com Eureka e Spring Cloud Gateway](https://www.youtube.com/watch?v=ju7NTqJxKRs)
+
 Mais um problema resolvido, correto? Mas ainda temos alguns problemas com essa arquitetura: e se houver mais instâncias
 do mesmo serviço? Trabalharemos com o Load Balancer Pattern. ⬇️
 
